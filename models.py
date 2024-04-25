@@ -1,4 +1,21 @@
 from sqlmodel import Field, SQLModel, Relationship
+from pydantic import EmailStr
+from enum import Enum
+
+# -------------------------------------------------------------------------------------------------#
+
+
+class Roles(str, Enum):
+    admin = "admin"
+    user = "user"
+
+
+# -------------------------------------------------------------------------------------------------#
+
+
+class Token(SQLModel):
+    access_token: str | None
+    refresh_token: str | None
 
 
 # -------------------------------------------------------------------------------------------------#
@@ -36,10 +53,11 @@ class Property(PropertyBase, table=True):
 
 class UserBase(SQLModel):
     name: str
-    email: str
+    email: EmailStr
     phone: str
     password: str
-    role: str
+    role: Roles = Field(default="user")
+    disabled: bool | None = None
 
 
 class UserCreate(UserBase):
@@ -48,6 +66,7 @@ class UserCreate(UserBase):
 
 class User(UserBase, table=True):
     id: int = Field(default=None, primary_key=True)
+    name: str = Field(index=True, unique=True)
     email: str = Field(index=True, unique=True)
     phone: str = Field(index=True, unique=True)
     properties: list[Property] = Relationship(back_populates="user")

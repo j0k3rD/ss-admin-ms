@@ -2,18 +2,19 @@ from fastapi import APIRouter, Depends, Path, HTTPException
 from sqlmodel import Session, select
 from models import User, UserCreate
 from models import Property
-from cryptography.fernet import Fernet
+from passlib.context import CryptContext
 from src.config.db import get_session
 from typing import Annotated
-
-key = Fernet.generate_key()
-f = Fernet(key)
+from src.routes.auth import RoleChecker
 
 user = APIRouter()
+
+f = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 @user.get("/users")
 async def get_users(
+    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["admin"]))],
     session: Session = Depends(get_session),
 ) -> list[User]:
     user_list = session.exec(select(User)).all()
@@ -24,6 +25,7 @@ async def get_users(
 @user.get("/users/{user_id}")
 async def get_user(
     user_id: Annotated[int, Path(name="The User ID")],
+    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["admin"]))],
     session: Session = Depends(get_session),
 ) -> User:
 
@@ -35,19 +37,24 @@ async def get_user(
 
 @user.post("/users")
 async def create_user(
-    user_data: UserCreate, session: Session = Depends(get_session)
+    user_data: UserCreate,
+    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["admin"]))],
+    session: Session = Depends(get_session),
 ) -> User:
     user = User(
         name=user_data.name,
         email=user_data.email,
-        password=f.encrypt(user_data.password.encode()).decode(),
+        password=f.hash(user_data.password),
         phone=user_data.phone,
         role=user_data.role,
     )
 
+    name_check = session.exec(select(User).where(User.name == user.name)).first()
     email_check = session.exec(select(User).where(User.email == user.email)).first()
     phone_check = session.exec(select(User).where(User.phone == user.phone)).first()
 
+    if name_check:
+        raise HTTPException(status_code=400, detail="Name already registered")
     if email_check:
         raise HTTPException(status_code=400, detail="Email already registered")
     if phone_check:

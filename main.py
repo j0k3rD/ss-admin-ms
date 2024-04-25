@@ -9,6 +9,7 @@ from src.routes import (
     provider_client,
     scrapped_data,
     client_property,
+    token,
 )
 
 load_dotenv()
@@ -28,3 +29,4 @@ app.include_router(service.service)
 app.include_router(client_property.client_property)
 app.include_router(provider_client.provider_client)
 app.include_router(scrapped_data.scrapped_data)
+app.include_router(token.token)
