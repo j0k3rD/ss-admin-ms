@@ -21,7 +21,16 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+description = """
+SmartServices API helps you do awesome stuff. 🚀
+"""
+
+app = FastAPI(
+    lifespan=lifespan,
+    title="SmartService API",
+    description=description,
+    version="0.0.1",
+)
 
 app.include_router(company.company)
 app.include_router(user.user)

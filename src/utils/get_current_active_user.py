@@ -10,4 +10,5 @@ async def get_current_active_user(
     current_user = await current_user
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
+    print("CURRENTUSER:", current_user)
     return current_user

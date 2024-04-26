@@ -2,16 +2,13 @@ from datetime import timedelta
 from typing import Annotated
 import os
 from dotenv import load_dotenv
-from src.config.db import get_session
-
 from fastapi import Depends, APIRouter, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-
 from src.utils.authenticate_user import authenticate_user
 from src.utils.create_token import create_token
 from src.utils.validate_refresh_token import validate_refresh_token
-
 from models import Token, User
+
 
 refresh_tokens = []
 
@@ -23,7 +20,7 @@ REFRESH_TOKEN_EXPIRE_MINUTES = int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES"))
 token = APIRouter()
 
 
-@token.post("/token")
+@token.post("/token", tags=["token"])
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ) -> Token:
@@ -49,7 +46,7 @@ async def login_for_access_token(
     return Token(access_token=access_token, refresh_token=refresh_token)
 
 
-@token.post("/refresh")
+@token.post("/refresh", tags=["token"])
 async def refresh_access_token(
     token_data: Annotated[tuple[User, str], Depends(validate_refresh_token)]
 ):

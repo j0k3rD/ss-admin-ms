@@ -1,26 +1,76 @@
-from fastapi import APIRouter, Depends
-from sqlmodel import Session
+from fastapi import APIRouter, Depends, Path, HTTPException
 from src.config.db import get_session
-from models import Property
+from models import Property, User
+from typing import Annotated
+from src.routes.auth import RoleChecker
+from sqlmodel import Session
+from src.services.property_service import (
+    get_properties,
+    get_property,
+    update_property,
+    delete_property,
+    create_property,
+)
+from src.utils.get_current_active_user import get_current_active_user
 
 client_property = APIRouter()
 
 
-@client_property.get("/properties")
-async def get_properties(property_data: Property) -> Property:
-    return property_data
+@client_property.get("/properties", tags=["properties"])
+async def get_properties_route(
+    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    session: Session = Depends(get_session),
+) -> list[Property]:
+    return await get_properties(session)
 
 
-@client_property.post("/properties")
-def create_property(
-    property_data: Property, session: Session = Depends(get_session)
+@client_property.get(
+    "/properties/{property_id}",
+    response_model=Property,
+    tags=["properties"],
+)
+async def get_property_route(
+    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    property_id: Annotated[int, Path(name="The Property ID")],
+    session: Session = Depends(get_session),
 ) -> Property:
-    client_property = Property(
-        created_at=property_data.created_at,
-        name=property_data.name,
-        service_type=property_data.service_type,
-    )
-    session.add(client_property)
-    session.commit()
-    session.refresh(client_property)
+    client_property = await get_property(session, property_id)
+    if client_property is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+    return client_property
+
+
+@client_property.patch("/properties/{property_id}", tags=["properties"])
+async def update_property_route(
+    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    property_id: int,
+    property_data: Property,
+    session: Session = Depends(get_session),
+) -> Property:
+    client_property = await update_property(session, property_id, property_data)
+    if client_property is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+    return client_property
+
+
+@client_property.delete("/properties/{property_id}", tags=["properties"])
+async def delete_property_route(
+    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    property_id: int,
+    session: Session = Depends(get_session),
+) -> Property:
+    client_property = await delete_property(session, property_id)
+    if client_property is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+    return client_property
+
+
+@client_property.post("/properties", tags=["properties"])
+async def create_property_route(
+    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    property_data: Property,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    session: Session = Depends(get_session),
+) -> Property:
+    client_property = await create_property(session, property_data, current_user)
     return client_property

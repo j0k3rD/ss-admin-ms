@@ -40,12 +40,18 @@ class Service(ServiceBase, table=True):
 class PropertyBase(SQLModel):
     created_at: str
     property_type: str
-    user_id: int | None = Field(foreign_key="user.id")
+
+    user_id: int | None = Field(default=None, foreign_key="user.id")
 
 
 class Property(PropertyBase, table=True):
     id: int = Field(default=None, primary_key=True)
+
     user: "User" = Relationship(back_populates="properties")
+
+
+class PropertyWithUser(PropertyBase):
+    user: "User" = None
 
 
 # -------------------------------------------------------------------------------------------------#
@@ -69,7 +75,12 @@ class User(UserBase, table=True):
     name: str = Field(index=True, unique=True)
     email: str = Field(index=True, unique=True)
     phone: str = Field(index=True, unique=True)
-    properties: list[Property] = Relationship(back_populates="user")
+
+    properties: list["Property"] = Relationship(back_populates="user")
+
+
+class UserWithProperties(UserBase):
+    properties: list[Property] = []
 
 
 # -------------------------------------------------------------------------------------------------#
