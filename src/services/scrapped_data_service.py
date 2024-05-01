@@ -1,4 +1,4 @@
-from models import ScrappedData
+from src.db.models import ScrappedData
 from sqlmodel import Session, select
 from fastapi import HTTPException
 

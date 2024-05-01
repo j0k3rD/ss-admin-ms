@@ -1,6 +1,6 @@
 from passlib.context import CryptContext
-from models import User
-from src.config.db import get_session
+from src.db.models import User
+from src.db.main import get_session
 from sqlmodel import select
 
 

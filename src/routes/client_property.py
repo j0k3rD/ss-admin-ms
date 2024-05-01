@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Path, HTTPException
-from src.config.db import get_session
-from models import Property, User
+from src.db.main import get_session
+from src.db.models import Property, User
 from typing import Annotated
 from src.routes.auth import RoleChecker
 from sqlmodel import Session

@@ -1,7 +1,5 @@
-from models import Property
+from src.db.models import Property, User
 from sqlmodel import Session, select
-from datetime import datetime
-from models import User
 from src.utils.nproperties_from_user import get_nproperties_by_user
 from fastapi import HTTPException
 
@@ -20,15 +18,15 @@ async def update_property(
     client_property = session.get(Property, property_id)
     client_property.property_type = property_data.property_type
     session.add(client_property)
-    session.commit()
-    session.refresh(client_property)
+    await session.commit()
+    await session.refresh(client_property)
     return client_property
 
 
 async def delete_property(session: Session, property_id: int) -> Property:
     client_property = session.get(Property, property_id)
     session.delete(client_property)
-    session.commit()
+    await session.commit()
     return client_property
 
 
@@ -45,12 +43,11 @@ async def create_property(
     property_data.user_id = current_user.id
 
     client_property = Property(
-        created_at=datetime.now(),
         property_type=property_data.property_type,
         user_id=property_data.user_id,
     )
 
     session.add(client_property)
-    session.commit()
-    session.refresh(client_property)
+    await session.commit()
+    await session.refresh(client_property)
     return client_property

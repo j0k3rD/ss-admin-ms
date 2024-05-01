@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from typing import Annotated
-from models import User
+from src.db.models import User
 from typing import Annotated
 
 from src.utils.get_current_active_user import get_current_active_user

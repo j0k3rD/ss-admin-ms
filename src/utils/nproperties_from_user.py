@@ -1,6 +1,6 @@
 from sqlmodel import select
-from models import User
-from src.config.db import get_session
+from src.db.models import User
+from src.db.main import get_session
 
 
 async def get_nproperties_by_user(id: int):

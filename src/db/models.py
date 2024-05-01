@@ -1,6 +1,9 @@
-from sqlmodel import Field, SQLModel, Relationship
+from sqlmodel import Field, SQLModel, Relationship, Column
+import sqlalchemy.dialects.postgresql as pg
 from pydantic import EmailStr
 from enum import Enum
+from typing import Dict
+from datetime import datetime
 
 # -------------------------------------------------------------------------------------------------#
 
@@ -20,25 +23,40 @@ class Token(SQLModel):
 
 # -------------------------------------------------------------------------------------------------#
 
+class ServiceType(str, Enum):
+    INTERNET = 'internet'
+    AGUA = 'agua'
+    LUZ = 'luz'
+    GAS = 'gas'
+    OTRO = 'otro'
 
 class ServiceBase(SQLModel):
-    date: str
-    name: str
-    company_id: int = Field(default=None, foreign_key="company.id")
-    service_type: str
+    company_name: str
+    service_type: ServiceType | None
     scrapping_type: str
-    scrapping_config: str
-
 
 class Service(ServiceBase, table=True):
     id: int = Field(default=None, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.now)
+    scrapping_config: Dict = Field(default_factory=dict, sa_column=Column(pg.JSONB))
+    providers_client: list["ProviderClient"] = Relationship(back_populates="service")
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "company_name": self.company_name,
+            "service_type": self.service_type,
+            "scrapping_type": self.scrapping_type,
+            "scrapping_config": self.scrapping_config
+        }
+    
+    class Config:
+        arbitrary_types_allowed = True
 
 # -------------------------------------------------------------------------------------------------#
 
 
 class PropertyBase(SQLModel):
-    created_at: str
     property_type: str
 
     user_id: int | None = Field(default=None, foreign_key="user.id")
@@ -46,6 +64,7 @@ class PropertyBase(SQLModel):
 
 class Property(PropertyBase, table=True):
     id: int = Field(default=None, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.now)
 
     user: "User" = Relationship(back_populates="properties")
 
@@ -77,6 +96,7 @@ class User(UserBase, table=True):
     phone: str = Field(index=True, unique=True)
 
     properties: list["Property"] = Relationship(back_populates="user")
+    providers_client: list["ProviderClient"] = Relationship(back_populates="user")
 
 
 class UserWithProperties(UserBase):
@@ -86,21 +106,9 @@ class UserWithProperties(UserBase):
 # -------------------------------------------------------------------------------------------------#
 
 
-class CompanyBase(SQLModel):
-    created_at: str
-    name: str
-    service_type: str
-
-
-class Company(CompanyBase, table=True):
-    id: int = Field(default=None, primary_key=True)
-
-
-# -------------------------------------------------------------------------------------------------#
-
-
 class ProviderClientBase(SQLModel):
     client_code: str
+
     service_id: int = Field(foreign_key="service.id")
     user_id: int = Field(foreign_key="user.id")
 
@@ -108,6 +116,16 @@ class ProviderClientBase(SQLModel):
 class ProviderClient(ProviderClientBase, table=True):
     id: int = Field(default=None, primary_key=True)
 
+    user: "User" = Relationship(back_populates="providers_client")
+    service: "Service" = Relationship(back_populates="providers_client")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "client_code": self.client_code,
+            "service_id": self.service_id,
+            "user_id": self.user_id
+        }
 
 # -------------------------------------------------------------------------------------------------#
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Path, HTTPException
-from src.config.db import get_session
-from models import User, UserCreate, UserWithProperties
+from src.db.main import get_session
+from src.db.models import User, UserCreate, UserWithProperties
 from typing import Annotated
 from sqlmodel import Session
 from src.routes.auth import RoleChecker
@@ -17,9 +17,12 @@ user = APIRouter()
 
 @user.get("/users", tags=["users"])
 async def get_users_route(
-    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     session: Session = Depends(get_session),
 ) -> list[User]:
+    '''
+        Prueba
+    '''
     return get_users(session)
 
 
@@ -30,7 +33,7 @@ async def get_users_route(
 )
 async def get_user_route(
     user_id: Annotated[int, Path(name="The User ID")],
-    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     session: Session = Depends(get_session),
 ) -> User:
     user = get_user(session, user_id)
@@ -43,10 +46,10 @@ async def get_user_route(
 async def update_user_route(
     user_id: int,
     user_data: UserCreate,
-    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     session: Session = Depends(get_session),
 ) -> User:
-    user = update_user(session, user_id, user_data)
+    user = await update_user(session, user_id, user_data)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -55,10 +58,10 @@ async def update_user_route(
 @user.delete("/users/{user_id}", tags=["users"])
 async def delete_user_route(
     user_id: int,
-    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     session: Session = Depends(get_session),
 ) -> User:
-    user = delete_user(session, user_id)
+    user = await delete_user(session, user_id)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -67,7 +70,7 @@ async def delete_user_route(
 @user.post("/users", tags=["users"])
 async def create_user_route(
     user_data: UserCreate,
-    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     session: Session = Depends(get_session),
 ) -> User:
-    return create_user(session, user_data)
+    return await create_user(session, user_data)

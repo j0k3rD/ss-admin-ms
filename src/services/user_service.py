@@ -1,39 +1,39 @@
-from models import User, UserCreate, Property
+from src.db.models import User, UserCreate, Property
 from sqlmodel import Session, select
 from passlib.context import CryptContext
 
 f = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def get_users(session: Session) -> list[User]:
-    return session.exec(select(User)).all()
+async def get_users(session: Session) -> list[User]:
+    return await session.exec(select(User)).all()
 
 
-def get_user(session: Session, user_id: int) -> User:
-    return session.get(User, user_id)
+async def get_user(session: Session, user_id: int) -> User:
+    return await session.get(User, user_id)
 
 
-def update_user(session: Session, user_id: int, user_data: UserCreate) -> User:
-    user = session.get(User, user_id)
+async def update_user(session: Session, user_id: int, user_data: UserCreate) -> User:
+    user = await session.get(User, user_id)
     user.name = user_data.name
     user.email = user_data.email
     user.password = f.hash(user_data.password)
     user.phone = user_data.phone
     user.role = user_data.role
     session.add(user)
-    session.commit()
-    session.refresh(user)
+    await session.commit()
+    await session.refresh(user)
     return user
 
 
-def delete_user(session: Session, user_id: int) -> User:
-    user = session.get(User, user_id)
-    session.delete(user)
-    session.commit()
+async def delete_user(session: Session, user_id: int) -> User:
+    user = await session.get(User, user_id)
+    await session.delete(user)
+    await session.commit()
     return user
 
 
-def create_user(session: Session, user_data: UserCreate) -> User:
+async def create_user(session: Session, user_data: UserCreate) -> User:
     user = User(
         name=user_data.name,
         email=user_data.email,
@@ -42,9 +42,14 @@ def create_user(session: Session, user_data: UserCreate) -> User:
         role=user_data.role,
     )
 
-    name_check = session.exec(select(User).where(User.name == user.name)).first()
-    email_check = session.exec(select(User).where(User.email == user.email)).first()
-    phone_check = session.exec(select(User).where(User.phone == user.phone)).first()
+    name_check = await session.execute(select(User).where(User.name == user.name))
+    name_check = name_check.scalar_one_or_none()
+
+    email_check = await session.execute(select(User).where(User.email == user.email))
+    email_check = email_check.scalar_one_or_none()
+
+    phone_check = await session.execute(select(User).where(User.phone == user.phone))
+    phone_check = phone_check.scalar_one_or_none()
 
     if name_check or email_check or phone_check:
         return "User already exists."
@@ -60,6 +65,6 @@ def create_user(session: Session, user_data: UserCreate) -> User:
             )
             session.add(property_obj)
 
-    session.commit()
-    session.refresh(user)
+    await session.commit()
+    await session.refresh(user)
     return user
