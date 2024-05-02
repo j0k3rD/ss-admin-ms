@@ -16,7 +16,7 @@ service = APIRouter()
 
 @service.get("/services", tags=["services"])
 async def get_services_route(session: Session = Depends(get_session)) -> list[Service]:
-    return get_services(session)
+    return await get_services(session)
 
 
 @service.get(

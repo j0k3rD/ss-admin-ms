@@ -32,7 +32,7 @@ app = FastAPI(
     version="0.0.1",
 )
 
-app.include_router(user.user)
+app.include_router(user.user) 
 app.include_router(service.service)
 app.include_router(client_property.client_property)
 app.include_router(provider_client.provider_client)

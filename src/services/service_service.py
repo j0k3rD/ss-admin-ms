@@ -33,6 +33,7 @@ async def delete_service(session: Session, service_id: int) -> Service:
 
     await session.delete(service)
     await session.commit()
+    return service
 
 
 async def create_service(session: Session, service_data: Service) -> Service:

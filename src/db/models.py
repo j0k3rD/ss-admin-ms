@@ -106,6 +106,23 @@ class UserWithProperties(UserBase):
 # -------------------------------------------------------------------------------------------------#
 
 
+class ScrappedDataBase(SQLModel):
+    provider_client_id: int = Field(foreign_key="providerclient.id")
+
+
+class ScrappedData(ScrappedDataBase, table=True):
+    id: int = Field(default=None, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
+    bills: Dict = Field(default_factory=dict, sa_column=Column(pg.JSONB))
+    consumption_data: Dict = Field(default_factory=dict, sa_column=Column(pg.JSONB))
+
+    provider_client: "ProviderClient" = Relationship(back_populates="scrapped_datas")
+    
+
+# -------------------------------------------------------------------------------------------------#
+
+
 class ProviderClientBase(SQLModel):
     client_code: str
 
@@ -118,6 +135,8 @@ class ProviderClient(ProviderClientBase, table=True):
 
     user: "User" = Relationship(back_populates="providers_client")
     service: "Service" = Relationship(back_populates="providers_client")
+    scrapped_datas: list["ScrappedData"] = Relationship(back_populates="provider_client")
+    
 
     def to_dict(self):
         return {
@@ -126,19 +145,6 @@ class ProviderClient(ProviderClientBase, table=True):
             "service_id": self.service_id,
             "user_id": self.user_id
         }
-
-# -------------------------------------------------------------------------------------------------#
-
-
-class ScrappedDataBase(SQLModel):
-    date: str
-    bills: str
-    consumption_data: str
-    provider_client_id: int = Field(foreign_key="providerclient.id")
-
-
-class ScrappedData(ScrappedDataBase, table=True):
-    id: int = Field(default=None, primary_key=True)
-
+    
 
 # -------------------------------------------------------------------------------------------------#

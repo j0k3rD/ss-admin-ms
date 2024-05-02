@@ -25,6 +25,7 @@ async def get_provider_clients_route(
     "/provider-clients/{provider_client_id}",
     response_model=ProviderClient,
     tags=["provider-clients"],
+    include_in_schema=False #* This line is added to exclude this route from the OpenAPI schema
 )
 async def get_provider_client_route(
     provider_client_id: Annotated[int, Path(name="The Provider Client ID")],
