@@ -1,34 +1,54 @@
-from src.db.models import User, UserCreate, Property
+from src.db.models import User, UserCreate, Property, ProviderClient, ScrappedData
 from sqlmodel import Session, select
 from passlib.context import CryptContext
+from fastapi import HTTPException
 
 f = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 async def get_users(session: Session) -> list[User]:
-    return await session.exec(select(User)).all()
+    result = await session.execute(select(User))
+    return result.scalars().all()
 
 
 async def get_user(session: Session, user_id: int) -> User:
-    return await session.get(User, user_id)
-
-
-async def update_user(session: Session, user_id: int, user_data: UserCreate) -> User:
     user = await session.get(User, user_id)
-    user.name = user_data.name
-    user.email = user_data.email
-    user.password = f.hash(user_data.password)
-    user.phone = user_data.phone
-    user.role = user_data.role
-    session.add(user)
-    await session.commit()
-    await session.refresh(user)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
     return user
+
+
+# async def update_user(session: Session, user_id: int, user_data: User) -> User:
+#     user = await session.get(User, user_id)
+#     if user is None:
+#         raise HTTPException(status_code=404, detail="User not found")
+
+#     user_dict = user.dict(exclude_unset=True)
+#     for field, value in user_dict.items():
+#         setattr(user, field, value) if value else None
+
+#     session.add(user)
+#     await session.commit()
+#     await session.refresh(user)
+#     return user
 
 
 async def delete_user(session: Session, user_id: int) -> User:
     user = await session.get(User, user_id)
-    await session.delete(user)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    result = await session.execute(select(ProviderClient).where(ProviderClient.user_id == user_id))
+    provider_clients = result.scalars().all()
+    for provider_client in provider_clients:
+        scrapped_data_result = await session.execute(select(ScrappedData).where(ScrappedData.provider_client_id == provider_client.id))
+        scrapped_data = scrapped_data_result.scalars().all()
+        for data in scrapped_data:
+            await session.delete(data)
+
+        await session.delete(provider_client)
+
+    session.delete(user)
     await session.commit()
     return user
 

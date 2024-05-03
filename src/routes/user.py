@@ -7,7 +7,7 @@ from src.routes.auth import RoleChecker
 from src.services.user_service import (
     get_users,
     get_user,
-    update_user,
+    # update_user,
     delete_user,
     create_user,
 )
@@ -21,14 +21,14 @@ async def get_users_route(
     session: Session = Depends(get_session),
 ) -> list[User]:
     '''
-        Prueba
+    Get all users
     '''
-    return get_users(session)
+    return await get_users(session)
 
 
 @user.get(
     "/users/{user_id}",
-    response_model=UserWithProperties,
+    response_model=User,
     tags=["users"],
 )
 async def get_user_route(
@@ -36,23 +36,20 @@ async def get_user_route(
     # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     session: Session = Depends(get_session),
 ) -> User:
-    user = get_user(session, user_id)
+    user = await get_user(session, user_id)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
-@user.patch("/users/{user_id}", tags=["users"])
-async def update_user_route(
-    user_id: int,
-    user_data: UserCreate,
-    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
-    session: Session = Depends(get_session),
-) -> User:
-    user = await update_user(session, user_id, user_data)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+# @user.patch("/users/{user_id}", tags=["users"])
+# async def update_user_route(
+#     user_id: int,
+#     user_data: UserCreate,
+#     # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+#     session: Session = Depends(get_session),
+# ) -> User:
+#     return update_user(session, user_id, user_data)
 
 
 @user.delete("/users/{user_id}", tags=["users"])
@@ -64,7 +61,7 @@ async def delete_user_route(
     user = await delete_user(session, user_id)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    return user
+    return {"message": "User deleted successfully"}
 
 
 @user.post("/users", tags=["users"])

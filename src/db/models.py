@@ -100,14 +100,14 @@ class User(UserBase, table=True):
 
 
 class UserWithProperties(UserBase):
-    properties: list[Property] = []
+    properties: list[PropertyWithUser] | None = None
 
 
 # -------------------------------------------------------------------------------------------------#
 
 
 class ScrappedDataBase(SQLModel):
-    provider_client_id: int = Field(foreign_key="providerclient.id")
+    provider_client_id: int | None = Field(default=None, foreign_key="providerclient.id", nullable=True)
 
 
 class ScrappedData(ScrappedDataBase, table=True):

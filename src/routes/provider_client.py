@@ -6,7 +6,7 @@ from typing import Annotated
 from src.services.provider_client_service import (
     get_provider_clients,
     get_provider_client,
-    update_provider_client,
+    # update_provider_client,
     delete_provider_client,
     create_provider_client,
 )
@@ -25,7 +25,7 @@ async def get_provider_clients_route(
     "/provider-clients/{provider_client_id}",
     response_model=ProviderClient,
     tags=["provider-clients"],
-    include_in_schema=False #* This line is added to exclude this route from the OpenAPI schema
+    #include_in_schema=False #* This line is added to exclude this route from the OpenAPI schema
 )
 async def get_provider_client_route(
     provider_client_id: Annotated[int, Path(name="The Provider Client ID")],
@@ -34,15 +34,15 @@ async def get_provider_client_route(
     return await get_provider_client(session, provider_client_id)
 
 
-@provider_client.patch(
-    "/provider-clients/{provider_client_id}", tags=["provider-clients"]
-)
-async def update_provider_client_route(
-    provider_client_id: int,
-    provider_client_data: ProviderClient,
-    session: Session = Depends(get_session),
-) -> ProviderClient:
-    return await update_provider_client(session, provider_client_id, provider_client_data)
+# @provider_client.patch(
+#     "/provider-clients/{provider_client_id}", tags=["provider-clients"]
+# )
+# async def update_provider_client_route(
+#     provider_client_id: int,
+#     provider_client_data: ProviderClient,
+#     session: Session = Depends(get_session),
+# ) -> ProviderClient:
+#     return await update_provider_client(session, provider_client_id, provider_client_data)
 
 
 @provider_client.delete(
@@ -52,7 +52,7 @@ async def delete_provider_client_route(
     provider_client_id: int,
     session: Session = Depends(get_session),
 ) -> ProviderClient:
-    await delete_provider_client(session, provider_client_id)
+    return await delete_provider_client(session, provider_client_id)
 
 
 @provider_client.post("/provider-clients", tags=["provider-clients"])

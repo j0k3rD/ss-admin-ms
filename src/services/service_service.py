@@ -5,7 +5,8 @@ from datetime import datetime
 
 
 async def get_services(session: Session) -> list[Service]:
-    return await session.exec(select(Service)).all()
+    result = await session.execute(select(Service))
+    return result.scalars().all()
 
 
 async def get_service(session: Session, service_id: int) -> Service:
@@ -26,14 +27,14 @@ async def get_service(session: Session, service_id: int) -> Service:
 #     return service
 
 
-async def delete_service(session: Session, service_id: int) -> Service:
-    service = session.get(Service, service_id)
+async def delete_service(session: Session, service_id: int) -> dict:
+    service = await session.get(Service, service_id)
     if service is None:
         raise HTTPException(status_code=404, detail="Service not found")
 
     await session.delete(service)
     await session.commit()
-    return service
+    return {"message": "Service deleted successfully"}
 
 
 async def create_service(session: Session, service_data: Service) -> Service:

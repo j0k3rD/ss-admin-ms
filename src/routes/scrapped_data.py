@@ -7,7 +7,7 @@ from src.services.scrapped_data_service import (
     get_scrapped_datas,
     get_scrapped_data,
     get_scrapped_data_by_provider_client_id,
-    update_scrapped_data,
+    # update_scrapped_data,
     delete_scrapped_data,
     create_scrapped_data,
 )
