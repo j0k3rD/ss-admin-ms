@@ -17,7 +17,7 @@ user = APIRouter()
 
 @user.get("/users", tags=["users"])
 async def get_users_route(
-    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     session: Session = Depends(get_session),
 ) -> list[User]:
     '''

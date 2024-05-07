@@ -15,16 +15,20 @@ async def get_service(session: Session, service_id: int) -> Service:
         raise HTTPException(status_code=404, detail="Service not found")
     return service
 
-# TODO: Implement update_service
-# async def update_service(session: Session, service_id: int, service_data: Service) -> Service:
-#     service = session.get(Service, service_id)
-#     if service is None:
-#         raise HTTPException(status_code=404, detail="Service not found")
 
-#     session.add(service)
-#     await session.commit()
-#     await session.refresh(service)
-#     return service
+async def update_service(session: Session, service_id: int, service_data: Service) -> Service:
+    service = await session.get(Service, service_id)
+    if service is None:
+        raise HTTPException(status_code=404, detail="Service not found")
+
+    for field, value in service_data.dict().items():
+        if value is not None:
+            setattr(service, field, value)
+
+    session.add(service)
+    await session.commit()
+    await session.refresh(service)
+    return service
 
 
 async def delete_service(session: Session, service_id: int) -> dict:

@@ -30,10 +30,12 @@ class ServiceType(str, Enum):
     GAS = 'gas'
     OTRO = 'otro'
 
+
 class ServiceBase(SQLModel):
     company_name: str
     service_type: ServiceType | None
     scrapping_type: str
+    
 
 class Service(ServiceBase, table=True):
     id: int = Field(default=None, primary_key=True)

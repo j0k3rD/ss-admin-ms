@@ -7,7 +7,7 @@ from src.services.scrapped_data_service import (
     get_scrapped_datas,
     get_scrapped_data,
     get_scrapped_data_by_provider_client_id,
-    # update_scrapped_data,
+    update_scrapped_data,
     delete_scrapped_data,
     create_scrapped_data,
 )
@@ -33,6 +33,7 @@ async def get_scrapped_data_route(
 ) -> ScrappedData:
     return await get_scrapped_data(session, scrapped_data_id)
 
+
 @scrapped_data.get(
     "/scrapped-datas/provider-client/{provider_client_id}",
     response_model=ScrappedData,
@@ -45,7 +46,7 @@ async def get_scrapped_data_by_provider_client_id_route(
     return await get_scrapped_data_by_provider_client_id(session, provider_client_id)
 
 
-@scrapped_data.patch("/scrapped-datas/{scrapped_data_id}", tags=["scrapped-datas"])
+@scrapped_data.put("/scrapped-datas/{scrapped_data_id}", tags=["scrapped-datas"])
 async def update_scrapped_data_route(
     scrapped_data_id: int,
     scrapped_data_data: ScrappedData,

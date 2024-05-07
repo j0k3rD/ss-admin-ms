@@ -6,7 +6,7 @@ from typing import Annotated
 from src.services.service_service import (
     get_services,
     get_service,
-    # update_service,
+    update_service,
     delete_service,
     create_service,
 )
@@ -31,13 +31,13 @@ async def get_service_route(
     return await get_service(session, service_id)
 
 
-# @service.patch("/services/{service_id}", tags=["services"])
-# def update_service_route(
-#     service_id: int,
-#     service_data: Service,
-#     session: Session = Depends(get_session),
-# ) -> Service:
-#     return update_service(session, service_id, service_data)
+@service.put("/services/{service_id}", tags=["services"])
+async def update_service_route(
+    service_id: int,
+    service_data: Service,
+    session: Session = Depends(get_session),
+) -> Service:
+    return await update_service(session, service_id, service_data)
 
 
 @service.delete("/services/{service_id}", tags=["services"])
