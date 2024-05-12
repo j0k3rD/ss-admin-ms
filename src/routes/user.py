@@ -64,8 +64,8 @@ async def delete_user_route(
     return {"message": "User deleted successfully"}
 
 
-@user.post("/users", tags=["users"])
-async def create_user_route(
+@user.post("/register", tags=["users"])
+async def register(
     user_data: UserCreate,
     # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     session: Session = Depends(get_session),

@@ -3,6 +3,7 @@ from sqlmodel import Session, select
 from fastapi import HTTPException
 
 
+
 async def get_provider_clients(session: Session) -> list[ProviderClient]:
     result = await session.execute(select(ProviderClient))
     return result.scalars().all()
@@ -15,20 +16,29 @@ async def get_provider_client(session: Session, provider_client_id: int) -> Prov
     return provider_client
 
 
-# async def update_provider_client(
-#     session: Session, provider_client_id: int, provider_client_data: ProviderClient
-# ) -> ProviderClient:
-#     provider_client = await session.get(ProviderClient, provider_client_id)
-#     if provider_client is None:
-#         raise HTTPException(status_code=404, detail="Provider Client not found")
+async def get_provider_clients_by_service_id(session: Session, service_id: int) -> list[ProviderClient]:
+    result = await session.execute(select(ProviderClient).where(ProviderClient.service_id == service_id))
+    provider_clients = result.scalars().all()
+    if provider_clients is None:
+        raise HTTPException(status_code=404, detail="Provider Clients not found")
+    return provider_clients
 
-#     provider_client.name = provider_client_data.name
-#     provider_client.service_type = provider_client_data.service_type
 
-#     session.add(provider_client)
-#     await session.commit()
-#     await session.refresh(provider_client)
-#     return provider_client
+async def update_provider_client(
+    session: Session, provider_client_id: int, provider_client_data: ProviderClient
+) -> ProviderClient:
+    provider_client = await session.get(ProviderClient, provider_client_id)
+    if provider_client is None:
+        raise HTTPException(status_code=404, detail="Provider Client not found")
+
+    for field, value in provider_client_data.dict().items():
+        if value is not None:
+            setattr(provider_client, field, value)
+
+    session.add(provider_client)
+    await session.commit()
+    await session.refresh(provider_client)
+    return provider_client
 
 
 async def delete_provider_client(session: Session, provider_client_id: int) -> ProviderClient:

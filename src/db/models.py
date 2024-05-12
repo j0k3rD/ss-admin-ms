@@ -41,6 +41,8 @@ class Service(ServiceBase, table=True):
     id: int = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=datetime.now)
     scrapping_config: Dict = Field(default_factory=dict, sa_column=Column(pg.JSONB))
+    crontab: Dict = Field(default_factory=dict, sa_column=Column(pg.JSONB))
+    schedule: Dict = Field(default_factory=dict, sa_column=Column(pg.JSONB))
     providers_client: list["ProviderClient"] = Relationship(back_populates="service")
 
     def to_dict(self):
@@ -49,7 +51,9 @@ class Service(ServiceBase, table=True):
             "company_name": self.company_name,
             "service_type": self.service_type,
             "scrapping_type": self.scrapping_type,
-            "scrapping_config": self.scrapping_config
+            "scrapping_config": self.scrapping_config,
+            "crontab": self.crontab,
+            "schedule": self.schedule
         }
     
     class Config:
