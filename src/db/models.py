@@ -62,8 +62,16 @@ class Service(ServiceBase, table=True):
 # -------------------------------------------------------------------------------------------------#
 
 
+class PropertyType(str, Enum):
+    CASA = 'casa'
+    DEPARTAMENTO = 'departamento'
+    OFICINA = 'oficina'
+    LOCAL = 'local'
+    OTRO = 'otro'
+
+
 class PropertyBase(SQLModel):
-    property_type: str
+    property_type: PropertyType | None
 
     user_id: int | None = Field(default=None, foreign_key="user.id")
 

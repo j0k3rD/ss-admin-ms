@@ -7,30 +7,32 @@ from sqlmodel import Session
 from src.services.property_service import (
     get_properties,
     get_property,
+    get_all_properties_by_user,
     update_property,
     delete_property,
     create_property,
 )
 from src.utils.get_current_active_user import get_current_active_user
 
+
 client_property = APIRouter()
 
 
 @client_property.get("/properties", tags=["properties"])
 async def get_properties_route(
-    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     session: Session = Depends(get_session),
 ) -> list[Property]:
     return await get_properties(session)
 
 
 @client_property.get(
-    "/properties/{property_id}",
+    "/property/{property_id}",
     response_model=Property,
     tags=["properties"],
 )
 async def get_property_route(
-    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     property_id: Annotated[int, Path(name="The Property ID")],
     session: Session = Depends(get_session),
 ) -> Property:
@@ -40,9 +42,26 @@ async def get_property_route(
     return client_property
 
 
-@client_property.patch("/properties/{property_id}", tags=["properties"])
+@client_property.get(
+    "/properties/user/{user_id}",
+    response_model=list[Property],
+    tags=["properties"],
+)
+async def get_all_properties_by_user_route(
+    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    user_id: Annotated[int, Path(name="The User ID")],
+    session: Session = Depends(get_session),
+) -> list[Property]:
+    return await get_all_properties_by_user(session, user_id)
+
+
+@client_property.put(
+    "/properties/{property_id}",
+    response_model=Property,
+    tags=["properties"],
+)
 async def update_property_route(
-    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     property_id: int,
     property_data: Property,
     session: Session = Depends(get_session),
@@ -53,9 +72,9 @@ async def update_property_route(
     return client_property
 
 
-@client_property.delete("/properties/{property_id}", tags=["properties"])
+@client_property.delete("/property/{property_id}", tags=["properties"])
 async def delete_property_route(
-    _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     property_id: int,
     session: Session = Depends(get_session),
 ) -> Property:
@@ -65,7 +84,7 @@ async def delete_property_route(
     return client_property
 
 
-@client_property.post("/properties", tags=["properties"])
+@client_property.post("/property", tags=["properties"])
 async def create_property_route(
     # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     property_data: Property,
