@@ -8,6 +8,7 @@ from src.services.property_service import (
     get_properties,
     get_property,
     get_all_properties_by_user,
+    get_properties_with_services,
     update_property,
     delete_property,
     create_property,
@@ -40,6 +41,18 @@ async def get_property_route(
     if client_property is None:
         raise HTTPException(status_code=404, detail="Property not found")
     return client_property
+
+
+@client_property.get(
+    "/properties/services",
+    response_model=list[Property],
+    tags=["properties"],
+)
+async def get_properties_with_services_route(
+    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    session: Session = Depends(get_session),
+) -> list[Property]:
+    return await get_properties_with_services(session)
 
 
 @client_property.get(

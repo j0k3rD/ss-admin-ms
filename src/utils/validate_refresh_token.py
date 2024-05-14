@@ -26,6 +26,7 @@ async def validate_refresh_token(token: Annotated[str, Depends(oauth2_scheme)]):
     try:
         if token in refresh_tokens:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            id: str = payload.get("id")
             username: str = payload.get("sub")
             role: str = payload.get("role")
             if username is None or role is None:

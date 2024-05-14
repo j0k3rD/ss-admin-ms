@@ -1,8 +1,8 @@
-from sqlmodel import Field, SQLModel, Relationship, Column
+from sqlmodel import Field, SQLModel, Relationship, Column, JSON
 import sqlalchemy.dialects.postgresql as pg
 from pydantic import EmailStr
 from enum import Enum
-from typing import Dict
+from typing import Dict, List
 from datetime import datetime
 
 # -------------------------------------------------------------------------------------------------#
@@ -72,16 +72,19 @@ class PropertyType(str, Enum):
 
 class PropertyBase(SQLModel):
     property_type: PropertyType | None
-
+    
     user_id: int | None = Field(default=None, foreign_key="user.id")
 
 
 class Property(PropertyBase, table=True):
     id: int = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=datetime.now)
+    client_services: List[str] = Field(sa_column=Column(JSON))
 
     user: "User" = Relationship(back_populates="properties")
 
+    class Config:
+        arbitrary_types_allowed = True
 
 class PropertyWithUser(PropertyBase):
     user: "User" = None

@@ -1,6 +1,7 @@
 from src.db.models import ProviderClient, Service, User
 from sqlmodel import Session, select
 from fastapi import HTTPException
+from sqlalchemy import select
 
 
 
@@ -54,6 +55,15 @@ async def delete_provider_client(session: Session, provider_client_id: int) -> P
 async def create_provider_client(
     session: Session, provider_clients_data: ProviderClient
 ) -> ProviderClient:
+    stmt = select(ProviderClient).where(
+        ProviderClient.client_code == provider_clients_data.client_code,
+        ProviderClient.service_id == provider_clients_data.service_id
+    )
+    result = await session.execute(stmt)
+    existing_provider_client = result.scalars().first()
+    if existing_provider_client is not None:
+        raise HTTPException(status_code=400, detail="Client code already exists for this service")
+
     provider_client = ProviderClient(
         client_code=provider_clients_data.client_code,
         service_id=provider_clients_data.service_id,
