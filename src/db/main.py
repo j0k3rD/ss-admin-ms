@@ -4,14 +4,21 @@ from sqlmodel import SQLModel
 from sqlalchemy.orm import sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-async_engine = create_async_engine(
-    url=settings.POSTGRES_URL,
-    echo=True
-)
+async_engine = create_async_engine(url=settings.POSTGRES_URL, echo=True)
+
 
 async def init_db():
     async with async_engine.begin() as conn:
-        from src.db.models import User, Property, Service, ScrappedData, Roles, Token, ProviderClient
+        from src.db.models import (
+            User,
+            Property,
+            Service,
+            ScrappedData,
+            Roles,
+            Token,
+            ProviderClient,
+        )
+
         await conn.run_sync(SQLModel.metadata.create_all)
 
 

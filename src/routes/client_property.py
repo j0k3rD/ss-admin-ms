@@ -69,12 +69,11 @@ async def get_all_properties_by_user_route(
 
 
 @client_property.put(
-    "/properties/{property_id}",
+    "/property/{property_id}",
     response_model=Property,
     tags=["properties"],
 )
 async def update_property_route(
-    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     property_id: int,
     property_data: Property,
     session: Session = Depends(get_session),
