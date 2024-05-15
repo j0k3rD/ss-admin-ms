@@ -10,7 +10,7 @@ from starlette.testclient import TestClient
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.db.main import get_session, init_db
-from src.config import settings
+from src.config.settings import get_settings
 from src.main import app
 
 USER_NAME = "testuser"
@@ -19,7 +19,7 @@ USER_PHONE = "1234567890"
 PASSWORD = "testpassword"
 ROLE = "admin"
 
-async_engine = create_async_engine(url=settings.POSTGRES_URL, echo=True)
+async_engine = create_async_engine(url=get_settings.POSTGRES_URL, echo=True)
 SessionTesting = sessionmaker(autoflush=False, bind=async_engine, autocommit=False)
 
 

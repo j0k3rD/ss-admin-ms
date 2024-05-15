@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Path, HTTPException, status
+from fastapi import APIRouter, Depends, Path, HTTPException, status, BackgroundTasks
 from src.db.main import get_session
 from src.db.models import User, UserCreate, UserWithProperties
 from typing import Annotated
@@ -75,7 +75,8 @@ async def delete_user_route(
 async def register(
     user_data: UserCreate,
     # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    background_tasks: BackgroundTasks,
     session: Session = Depends(get_session),
 ) -> dict:
-    user = await create_user(session, user_data)
+    user = await create_user(session, user_data, background_tasks)
     return {"user": user, "message": "User created successfully"}

@@ -2,6 +2,7 @@ from src.db.models import User, UserCreate, Property, ProviderClient, ScrappedDa
 from sqlmodel import Session, select
 from passlib.context import CryptContext
 from fastapi import HTTPException
+from src.services.email_service import send_account_verification_email
 
 f = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -59,7 +60,9 @@ async def delete_user(session: Session, user_id: int) -> User:
     return user
 
 
-async def create_user(session: Session, user_data: UserCreate) -> User:
+async def create_user(
+    session: Session, user_data: UserCreate, background_tasks
+) -> User:
     user = User(
         name=user_data.name,
         email=user_data.email,
@@ -93,4 +96,9 @@ async def create_user(session: Session, user_data: UserCreate) -> User:
 
     await session.commit()
     await session.refresh(user)
+
+    # Verificacion Email
+    print("Enviando email de verificacion")
+    await send_account_verification_email(user, background_tasks=background_tasks)
+
     return user

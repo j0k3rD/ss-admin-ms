@@ -1,10 +1,10 @@
 from sqlalchemy.ext.asyncio import create_async_engine
-from src.config import settings
+from src.config.settings import get_settings
 from sqlmodel import SQLModel
 from sqlalchemy.orm import sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-async_engine = create_async_engine(url=settings.POSTGRES_URL, echo=True)
+async_engine = create_async_engine(url=get_settings.POSTGRES_URL, echo=True)
 
 
 async def init_db():

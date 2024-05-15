@@ -114,9 +114,16 @@ class User(UserBase, table=True):
     name: str = Field(index=True, unique=True)
     email: str = Field(index=True, unique=True)
     phone: str = Field(index=True, unique=True)
+    is_active: bool = Field(default=False)
+    verified_at: datetime = Field(default=None, nullable=True)
+    updated_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=datetime.now)
 
     properties: list["Property"] = Relationship(back_populates="user")
     providers_client: list["ProviderClient"] = Relationship(back_populates="user")
+
+    def get_context_string(self, context: str):
+        return f"{context} {self.password[-6:]}{self.updated_at.strftime('%d%m%Y%H%M%S')}".strip()
 
 
 class UserWithProperties(UserBase):
@@ -171,3 +178,7 @@ class ProviderClient(ProviderClientBase, table=True):
 
 
 # -------------------------------------------------------------------------------------------------#
+
+
+class Email(SQLModel):
+    email: List[EmailStr]
