@@ -10,7 +10,7 @@ from src.routes import (
     scrapped_data,
     client_property,
     token,
-    scrap
+    scrap,
 )
 
 load_dotenv()
@@ -35,6 +35,7 @@ app = FastAPI(
 
 origins = [
     "http://localhost",
+    "http://192.168.18.4",
 ]
 
 app.add_middleware(
@@ -45,7 +46,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(user.user) 
+app.include_router(user.user)
 app.include_router(service.service)
 app.include_router(client_property.client_property)
 app.include_router(provider_client.provider_client)

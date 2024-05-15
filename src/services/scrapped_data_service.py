@@ -17,8 +17,14 @@ async def get_scrapped_data(session: Session, scrapped_data_id: int) -> Scrapped
     return scrapped_data
 
 
-async def get_scrapped_data_by_provider_client_id(session: Session, provider_client_id: int) -> ScrappedData:
-    result = await session.execute(select(ScrappedData).where(ScrappedData.provider_client_id == provider_client_id))
+async def get_scrapped_data_by_provider_client_id(
+    session: Session, provider_client_id: int
+) -> ScrappedData:
+    result = await session.execute(
+        select(ScrappedData).where(
+            ScrappedData.provider_client_id == provider_client_id
+        )
+    )
     scrapped_data = result.scalars().first()
     if scrapped_data is None:
         raise HTTPException(status_code=404, detail="Scrapped Data not found")
@@ -36,7 +42,7 @@ async def update_scrapped_data(
         scrapped_data.updated_at = datetime.now()
 
     for field, value in scrapped_data_data.dict().items():
-        if value is not None: 
+        if value is not None:
             setattr(scrapped_data, field, value)
 
     await session.commit()

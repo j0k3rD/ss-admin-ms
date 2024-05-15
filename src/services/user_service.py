@@ -38,10 +38,16 @@ async def delete_user(session: Session, user_id: int) -> User:
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    result = await session.execute(select(ProviderClient).where(ProviderClient.user_id == user_id))
+    result = await session.execute(
+        select(ProviderClient).where(ProviderClient.user_id == user_id)
+    )
     provider_clients = result.scalars().all()
     for provider_client in provider_clients:
-        scrapped_data_result = await session.execute(select(ScrappedData).where(ScrappedData.provider_client_id == provider_client.id))
+        scrapped_data_result = await session.execute(
+            select(ScrappedData).where(
+                ScrappedData.provider_client_id == provider_client.id
+            )
+        )
         scrapped_data = scrapped_data_result.scalars().all()
         for data in scrapped_data:
             await session.delete(data)

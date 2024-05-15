@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Path, HTTPException
+from fastapi import APIRouter, Depends, Path, HTTPException, status
 from src.db.main import get_session
 from src.db.models import User, UserCreate, UserWithProperties
 from typing import Annotated
@@ -71,10 +71,11 @@ async def delete_user_route(
     return {"message": "User deleted successfully"}
 
 
-@user.post("/register", tags=["users"])
+@user.post("/register", tags=["users"], status_code=status.HTTP_201_CREATED)
 async def register(
     user_data: UserCreate,
     # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     session: Session = Depends(get_session),
-) -> User:
-    return await create_user(session, user_data)
+) -> dict:
+    user = await create_user(session, user_data)
+    return {"user": user, "message": "User created successfully"}

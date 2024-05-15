@@ -17,7 +17,9 @@ async def get_service(session: Session, service_id: int) -> Service:
     return service
 
 
-async def update_service(session: Session, service_id: int, service_data: Service) -> Service:
+async def update_service(
+    session: Session, service_id: int, service_data: Service
+) -> Service:
     service = await session.get(Service, service_id)
     if service is None:
         raise HTTPException(status_code=404, detail="Service not found")
@@ -44,20 +46,20 @@ async def delete_service(session: Session, service_id: int) -> dict:
 
 async def create_service(session: Session, service_data: Service) -> Service:
     try:
-        start_datetime = datetime.strptime(service_data.schedule['start_time'], "%H:%M")
-        end_time = service_data.schedule.get('end_time', "23:59")
+        start_datetime = datetime.strptime(service_data.schedule["start_time"], "%H:%M")
+        end_time = service_data.schedule.get("end_time", "23:59")
         end_datetime = datetime.strptime(end_time, "%H:%M")
-        day_of_week = service_data.schedule.get('day_of_week', '*')
-        day_of_month = service_data.schedule.get('day_of_month', '*')
-        day_of_year = service_data.schedule.get('day_of_year', '*')
+        day_of_week = service_data.schedule.get("day_of_week", "*")
+        day_of_month = service_data.schedule.get("day_of_month", "*")
+        day_of_year = service_data.schedule.get("day_of_year", "*")
 
         cron_value = create_cron_schedule(
-            service_data.schedule['scheduling_type'],
+            service_data.schedule["scheduling_type"],
             start_datetime,
             end_datetime,
             day_of_week,
             day_of_month,
-            day_of_year
+            day_of_year,
         )
         if cron_value is None:
             raise HTTPException(status_code=400, detail="Invalid scheduling type")
@@ -68,7 +70,7 @@ async def create_service(session: Session, service_data: Service) -> Service:
             scrapping_type=service_data.scrapping_type,
             scrapping_config=service_data.scrapping_config,
             crontab=str(cron_value.__dict__),
-            schedule=service_data.schedule
+            schedule=service_data.schedule,
         )
         session.add(service)
         await session.commit()
