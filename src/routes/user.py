@@ -1,15 +1,17 @@
 from fastapi import APIRouter, Depends, Path, HTTPException, status, BackgroundTasks
 from src.db.main import get_session
-from src.db.models import User, UserCreate, UserWithProperties
+from src.db.models import User, UserCreate, UserWithProperties, VerifyUserRequest
 from typing import Annotated
 from sqlmodel import Session
 from src.routes.auth import RoleChecker
 from src.services.user_service import (
     get_users,
     get_user,
+    get_user_by_email,
     update_user,
     delete_user,
     create_user,
+    activate_account,
 )
 
 user = APIRouter()
@@ -37,6 +39,22 @@ async def get_user_route(
     session: Session = Depends(get_session),
 ) -> User:
     user = await get_user(session, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
+@user.get(
+    "/users/email/{email}",
+    response_model=User,
+    tags=["users"],
+)
+async def get_user_by_email_route(
+    email: str,
+    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
+    session: Session = Depends(get_session),
+) -> User:
+    user = await get_user_by_email(session, email)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -80,3 +98,15 @@ async def register(
 ) -> dict:
     user = await create_user(session, user_data, background_tasks)
     return {"user": user, "message": "User created successfully"}
+
+
+@user.post("/verify-account", tags=["users"])
+async def verify_account(
+    data: VerifyUserRequest,
+    background_tasks: BackgroundTasks,
+    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"])),
+    session: Session = Depends(get_session),
+) -> dict:
+    # Return con mensaje
+    user = await activate_account(session, data, background_tasks)
+    return {"user": user, "message": "User account verified successfully"}

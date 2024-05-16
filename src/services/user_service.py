@@ -1,8 +1,19 @@
-from src.db.models import User, UserCreate, Property, ProviderClient, ScrappedData
+from src.db.models import (
+    User,
+    UserCreate,
+    Property,
+    ProviderClient,
+    ScrappedData,
+    VerifyUserRequest,
+)
 from sqlmodel import Session, select
 from passlib.context import CryptContext
 from fastapi import HTTPException
 from src.services.email_service import send_account_verification_email
+from datetime import datetime
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.utils.email_context import USER_VERIFY_ACCOUNT
+
 
 f = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -14,6 +25,14 @@ async def get_users(session: Session) -> list[User]:
 
 async def get_user(session: Session, user_id: int) -> User:
     user = await session.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
+async def get_user_by_email(session: Session, email: str) -> User:
+    user = await session.execute(select(User).where(User.email == email))
+    user = user.scalars().first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -102,3 +121,36 @@ async def create_user(
     await send_account_verification_email(user, background_tasks=background_tasks)
 
     return user
+
+
+async def activate_account(
+    session: AsyncSession,
+    data: VerifyUserRequest,
+    background_tasks,
+):
+    user = await get_user_by_email(session, data.email)
+    print("User: ", user)
+    if user is None:
+        raise HTTPException(status_code=404, detail="This link is invalid.")
+
+    user_token = user.get_context_string(context=USER_VERIFY_ACCOUNT)
+
+    try:
+        print("Verificando token")
+        token_valid = f.verify(user_token, data.verification_code)
+    except Exception as e:
+        print(e)
+        token_valid = False
+    if not token_valid:
+        raise HTTPException(status_code=404, detail="This link is invalid.")
+
+    user.is_active = True
+    user.updated_at = datetime.now()
+    user.verified_at = datetime.now()
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+
+    # Activation confirmation email
+
+    return {"message": "Account verified successfully", "user": user}

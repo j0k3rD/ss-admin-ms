@@ -33,7 +33,7 @@ conf = ConnectionConfig(
     MAIL_DEBUG=True,
     MAIL_FROM="mailtrap@demomailtrap.com",
     MAIL_FROM_NAME=os.getenv("APP_NAME"),
-    TEMPLATE_FOLDER=Path(__file__).parent.parent / "templates/user",
+    TEMPLATE_FOLDER=Path(__file__).parent.parent / "templates",
     USE_CREDENTIALS=os.getenv("USE_CREDENTIALS"),
     SUPPRESS_SEND=False,
 )

@@ -19,11 +19,27 @@ async def send_account_verification_email(
         "name": user.name,
         "activate_url": activate_url,
     }
-    subject = f"Account Verification - {get_settings.APP_NAME}"
+    subject = f"Verificacion de Cuenta - {get_settings.APP_NAME}"
     await send_email(
         recipients=[user.email],
         subject=subject,
         context=data,
-        template_name="account_verification.html",
+        template_name="/user/account_verification.html",
+        background_tasks=background_tasks,
+    )
+
+
+async def send_account_activation_email(user: User, background_tasks: BackgroundTasks):
+    data = {
+        "app_name": get_settings.APP_NAME,
+        "name": user.name,
+        "login_url": f"{get_settings.FRONTEND_URL}/auth/login",
+    }
+    subject = f"Activacion de Cuenta - {get_settings.APP_NAME}"
+    await send_email(
+        recipients=[user.email],
+        subject=subject,
+        context=data,
+        template_name="/user/account_activation.html",
         background_tasks=background_tasks,
     )

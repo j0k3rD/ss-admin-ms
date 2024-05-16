@@ -105,6 +105,11 @@ class UserBase(SQLModel):
     disabled: bool | None = None
 
 
+class VerifyUserRequest(SQLModel):
+    email: EmailStr
+    verification_code: str
+
+
 class UserCreate(UserBase):
     properties: list[PropertyBase] | None = None
 
