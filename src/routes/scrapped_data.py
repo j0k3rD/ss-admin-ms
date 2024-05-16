@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Path
 from src.db.models import ScrappedData
 from sqlmodel import Session
-from src.db.main import get_session
+from src.db.database import get_session
 from typing import Annotated
 from src.services.scrapped_data_service import (
     get_scrapped_datas,

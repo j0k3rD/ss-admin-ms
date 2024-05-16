@@ -1,7 +1,7 @@
 from sqlmodel import select
 
 from src.db.models import User
-from src.db.main import get_session
+from src.db.database import get_session
 
 
 async def get_user_by_name(name: str):

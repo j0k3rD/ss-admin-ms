@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Path
 from src.db.models import Service
 from sqlmodel import Session
-from src.db.main import get_session
+from src.db.database import get_session
 from typing import Annotated
 from src.services.service_service import (
     get_services,

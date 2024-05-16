@@ -187,3 +187,7 @@ class ProviderClient(ProviderClientBase, table=True):
 
 class Email(SQLModel):
     email: List[EmailStr]
+
+
+class EmailRequest(SQLModel):
+    email: EmailStr

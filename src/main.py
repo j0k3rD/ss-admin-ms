@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from src.db.main import init_db
+from src.db.database import init_db
 from src.routes import (
     user,
     service,

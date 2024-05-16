@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Path, HTTPException
-from src.db.main import get_session
+from src.db.database import get_session
 from src.db.models import Property, User
 from typing import Annotated
 from src.routes.auth import RoleChecker

@@ -1,10 +1,7 @@
-from passlib.context import CryptContext
 from src.db.models import User
-from src.db.main import get_session
+from src.db.database import get_session
 from sqlmodel import select
-
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from src.utils.hasher import f
 
 
 async def authenticate_user(
@@ -18,6 +15,6 @@ async def authenticate_user(
     print(user)
     if not user:
         return False
-    if not pwd_context.verify(password, user.password):
+    if not f.verify(password, user.password):
         return False
     return user

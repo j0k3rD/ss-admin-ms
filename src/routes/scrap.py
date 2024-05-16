@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from src.services.scrap_service import generate_scrap_request
-from src.db.main import get_session
+from src.db.database import get_session
 from sqlmodel import Session
 from fastapi import Depends
 

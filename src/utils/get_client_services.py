@@ -1,6 +1,5 @@
 from sqlmodel import select
-from src.db.models import Property, Service
-from src.db.main import get_session
+from src.db.models import Property
 
 
 async def get_client_services(session, id: int):

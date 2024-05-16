@@ -1,9 +1,14 @@
-from datetime import datetime
-from croniter import croniter
 from celery.schedules import crontab
 
 
-def create_cron_schedule(scheduling_type, start_datetime, end_datetime, day_of_week=None, day_of_month=None, day_of_year=None):
+def create_cron_schedule(
+    scheduling_type,
+    start_datetime,
+    end_datetime,
+    day_of_week=None,
+    day_of_month=None,
+    day_of_year=None,
+):
     start_time = start_datetime.time()
     print(start_time)
     end_time = end_datetime.time()
@@ -30,7 +35,9 @@ def create_cron_schedule(scheduling_type, start_datetime, end_datetime, day_of_w
             minute=start_time.minute,
         )
     elif scheduling_type == "anual":
-        cron_string = f"{start_time.minute} {start_time.hour} {day_of_month} {day_of_year} *"
+        cron_string = (
+            f"{start_time.minute} {start_time.hour} {day_of_month} {day_of_year} *"
+        )
         cron_value = crontab(
             day_of_month=day_of_month,
             month_of_year=day_of_year,

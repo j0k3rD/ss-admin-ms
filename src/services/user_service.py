@@ -7,15 +7,15 @@ from src.db.models import (
     VerifyUserRequest,
 )
 from sqlmodel import Session, select
-from passlib.context import CryptContext
 from fastapi import HTTPException
-from src.services.email_service import send_account_verification_email
+from src.services.email_service import (
+    send_account_verification_email,
+    send_password_reset_email,
+)
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.utils.email_context import USER_VERIFY_ACCOUNT
-
-
-f = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from src.utils.email_context import USER_VERIFY_ACCOUNT, FORGOT_PASSWORD
+from src.utils.hasher import hash, f
 
 
 async def get_users(session: Session) -> list[User]:
@@ -85,7 +85,7 @@ async def create_user(
     user = User(
         name=user_data.name,
         email=user_data.email,
-        password=f.hash(user_data.password),
+        password=hash(user_data.password),
         phone=user_data.phone,
         role=user_data.role,
     )
@@ -154,3 +154,44 @@ async def activate_account(
     # Activation confirmation email
 
     return {"message": "Account verified successfully", "user": user}
+
+
+async def email_forgot_password(session: Session, data: dict, background_tasks):
+    user = await get_user_by_email(session, data["email"])
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not user.is_active:
+        raise HTTPException(status_code=404, detail="User not verified")
+
+    await send_password_reset_email(user, background_tasks=background_tasks)
+
+    # Enviar email de recuperacion de contraseña
+    return {"message": "Email sent successfully"}
+
+
+async def reset_password(session: Session, data: dict):
+    user = await get_user_by_email(session, data["email"])
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not user.is_active:
+        raise HTTPException(status_code=404, detail="User not verified")
+
+    user_token = user.get_context_string(context=FORGOT_PASSWORD)
+
+    try:
+        token_valid = f.verify(user_token, data["verification_code"])
+    except Exception as e:
+        print(e)
+        token_valid = False
+    if not token_valid:
+        raise HTTPException(status_code=404, detail="This link is invalid.")
+
+    user.password = hash(data["password"])
+    user.updated_at = datetime.now()
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+
+    return {"message": "Password reset successfully", "user": user}

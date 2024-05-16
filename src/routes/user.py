@@ -1,6 +1,12 @@
 from fastapi import APIRouter, Depends, Path, HTTPException, status, BackgroundTasks
-from src.db.main import get_session
-from src.db.models import User, UserCreate, UserWithProperties, VerifyUserRequest
+from src.db.database import get_session
+from src.db.models import (
+    User,
+    UserCreate,
+    UserWithProperties,
+    VerifyUserRequest,
+    EmailRequest,
+)
 from typing import Annotated
 from sqlmodel import Session
 from src.routes.auth import RoleChecker
@@ -12,6 +18,7 @@ from src.services.user_service import (
     delete_user,
     create_user,
     activate_account,
+    reset_password,
 )
 
 user = APIRouter()
@@ -110,3 +117,22 @@ async def verify_account(
     # Return con mensaje
     user = await activate_account(session, data, background_tasks)
     return {"user": user, "message": "User account verified successfully"}
+
+
+@user.post("/forgot-password", tags=["users"])
+async def forgot_password(
+    data: EmailRequest,
+    background_tasks: BackgroundTasks,
+    session: Session = Depends(get_session),
+) -> dict:
+    await user.email_forgot_password(session, data, background_tasks)
+    return {"message": "Email sent successfully"}
+
+
+@user.put("/reset-password", tags=["users"])
+async def reset_password(
+    data: EmailRequest,
+    session: Session = Depends(get_session),
+) -> dict:
+    await user.reset_password(session, data)
+    return {"message": "Password reset successfully"}

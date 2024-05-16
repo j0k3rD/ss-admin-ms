@@ -1,11 +1,9 @@
 from fastapi import HTTPException, BackgroundTasks
 from src.config.settings import get_settings
 from src.db.models import User
-from src.utils.email_context import USER_VERIFY_ACCOUNT
+from src.utils.email_context import USER_VERIFY_ACCOUNT, FORGOT_PASSWORD
 from src.config.email import send_email
-from passlib.context import CryptContext
-
-f = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from src.utils.hasher import f
 
 
 async def send_account_verification_email(
@@ -41,5 +39,24 @@ async def send_account_activation_email(user: User, background_tasks: Background
         subject=subject,
         context=data,
         template_name="/user/account_activation.html",
+        background_tasks=background_tasks,
+    )
+
+
+async def send_password_reset_email(user: User, background_tasks: BackgroundTasks):
+    string_context = user.get_context_string(context=FORGOT_PASSWORD)
+    token = f.hash(string_context)
+    reset_url = f"{get_settings.FRONTEND_URL}/auth/password-reset?token={token}&email={user.email}"
+    data = {
+        "app_name": get_settings.APP_NAME,
+        "name": user.name,
+        "reset_url": reset_url,
+    }
+    subject = f"Recuperacion de Contraseña - {get_settings.APP_NAME}"
+    await send_email(
+        recipients=[user.email],
+        subject=subject,
+        context=data,
+        template_name="/user/password_reset.html",
         background_tasks=background_tasks,
     )
