@@ -119,6 +119,21 @@ async def verify_account(
     return {"user": user, "message": "User account verified successfully"}
 
 
+@user.get("/activate-account", tags=["users"])
+async def activate_account_route(
+    token: str,
+    email: str,
+    background_tasks: BackgroundTasks,
+    session: Session = Depends(get_session),
+) -> dict:
+    await activate_account(
+        session,
+        VerifyUserRequest(verification_code=token, email=email),
+        background_tasks,
+    )
+    return {"message": "User account verified successfully"}
+
+
 @user.post("/forgot-password", tags=["users"])
 async def forgot_password(
     data: EmailRequest,

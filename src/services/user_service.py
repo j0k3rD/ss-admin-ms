@@ -72,17 +72,22 @@ async def delete_user(session: Session, user_id: int) -> User:
         select(ProviderClient).where(ProviderClient.user_id == user_id)
     )
     provider_clients = result.scalars().all()
-    for provider_client in provider_clients:
-        scrapped_data_result = await session.execute(
-            select(ScrappedData).where(
-                ScrappedData.provider_client_id == provider_client.id
-            )
-        )
-        scrapped_data = scrapped_data_result.scalars().all()
-        for data in scrapped_data:
-            await session.delete(data)
 
-        await session.delete(provider_client)
+    if provider_clients:
+        for provider_client in provider_clients:
+            scrapped_data_result = await session.execute(
+                select(ScrappedData).where(
+                    ScrappedData.provider_client_id == provider_client.id
+                )
+            )
+            scrapped_data = scrapped_data_result.scalars().all()
+            for data in scrapped_data:
+                await session.delete(data)
+
+            await session.delete(provider_client)
+
+    await session.delete(user)
+    await session.commit()
 
     session.delete(user)
     await session.commit()
@@ -183,6 +188,7 @@ async def activate_account(
     await session.refresh(user)
 
     # Activation confirmation email
+    await send_account_activation_email(user, background_tasks=background_tasks)
 
     return {"message": "Account verified successfully", "user": user}
 

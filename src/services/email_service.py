@@ -11,7 +11,7 @@ async def send_account_verification_email(
 ):
     string_context = user.get_context_string(context=USER_VERIFY_ACCOUNT)
     token = f.hash(string_context)
-    activate_url = f"{get_settings.FRONTEND_URL}/auth/account-verify?token={token}&email={user.email}"
+    activate_url = f"http://192.168.18.4:5000/api/v1/activate-account?token={token}&email={user.email}"
     data = {
         "app_name": get_settings.APP_NAME,
         "name": user.name,
