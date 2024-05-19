@@ -2,7 +2,7 @@ from sqlmodel import Field, SQLModel, Relationship, Column, JSON
 import sqlalchemy.dialects.postgresql as pg
 from pydantic import EmailStr
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Optional
 from datetime import datetime
 
 # -------------------------------------------------------------------------------------------------#
@@ -99,7 +99,7 @@ class PropertyWithUser(PropertyBase):
 class UserBase(SQLModel):
     name: str
     email: EmailStr
-    phone: str
+    # phone: Optional[str] = None
     password: str
     role: Roles = Field(default="user")
     disabled: bool | None = None
@@ -118,7 +118,7 @@ class User(UserBase, table=True):
     id: int = Field(default=None, primary_key=True)
     name: str = Field(index=True, unique=True)
     email: str = Field(index=True, unique=True)
-    phone: str = Field(index=True, unique=True)
+    # phone: str = Optional[str] = Field(default=None, nullable=True)
     is_active: bool = Field(default=False)
     verified_at: datetime = Field(default=None, nullable=True)
     updated_at: datetime = Field(default_factory=datetime.now)

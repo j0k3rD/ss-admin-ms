@@ -12,18 +12,6 @@ TEMPLATE_PATH = Path(__file__).parent.parent / "templates/user"
 
 env = Environment(loader=FileSystemLoader(TEMPLATE_PATH))
 
-user = os.getenv("MAIL_USERNAME")
-print("user---------------", user)
-password = os.getenv("MAIL_PASSWORD")
-print("password---------------", password)
-port = os.getenv("MAIL_PORT")
-print("port---------------", port)
-server = os.getenv("MAIL_SERVER")
-print("server---------------", server)
-app_name = os.getenv("APP_NAME")
-print("app_name---------------", app_name)
-
-
 conf = ConnectionConfig(
     MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
     MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
@@ -31,7 +19,7 @@ conf = ConnectionConfig(
     MAIL_STARTTLS=True,
     MAIL_SERVER=os.getenv("MAIL_SERVER"),
     MAIL_DEBUG=True,
-    MAIL_FROM="mailtrap@demomailtrap.com",
+    MAIL_FROM=os.getenv("MAIL_FROM"),
     MAIL_FROM_NAME=os.getenv("APP_NAME"),
     TEMPLATE_FOLDER=Path(__file__).parent.parent / "templates",
     USE_CREDENTIALS=os.getenv("USE_CREDENTIALS"),

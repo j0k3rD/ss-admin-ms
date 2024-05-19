@@ -11,11 +11,13 @@ from fastapi import HTTPException
 from src.services.email_service import (
     send_account_verification_email,
     send_password_reset_email,
+    send_account_activation_email,
 )
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.utils.email_context import USER_VERIFY_ACCOUNT, FORGOT_PASSWORD
 from src.utils.hasher import hash, f
+import random
 
 
 async def get_users(session: Session) -> list[User]:
@@ -32,6 +34,14 @@ async def get_user(session: Session, user_id: int) -> User:
 
 async def get_user_by_email(session: Session, email: str) -> User:
     user = await session.execute(select(User).where(User.email == email))
+    user = user.scalars().first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
+async def get_user_by_name(session: Session, name: str) -> User:
+    user = await session.execute(select(User).where(User.name == name))
     user = user.scalars().first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -80,47 +90,68 @@ async def delete_user(session: Session, user_id: int) -> User:
 
 
 async def create_user(
-    session: Session, user_data: UserCreate, background_tasks
+    session: Session, user_data: UserCreate, background_tasks, oauth=False
 ) -> User:
     user = User(
         name=user_data.name,
         email=user_data.email,
         password=hash(user_data.password),
-        phone=user_data.phone,
         role=user_data.role,
     )
 
-    name_check = await session.execute(select(User).where(User.name == user.name))
-    name_check = name_check.scalar_one_or_none()
+    if not oauth:
+        name_check = await session.execute(select(User).where(User.name == user.name))
+        name_check = name_check.scalar_one_or_none()
 
-    email_check = await session.execute(select(User).where(User.email == user.email))
-    email_check = email_check.scalar_one_or_none()
+        email_check = await session.execute(
+            select(User).where(User.email == user.email)
+        )
+        email_check = email_check.scalar_one_or_none()
 
-    phone_check = await session.execute(select(User).where(User.phone == user.phone))
-    phone_check = phone_check.scalar_one_or_none()
+        if name_check or email_check:
+            return "User already exists."
 
-    if name_check or email_check or phone_check:
-        return "User already exists."
+        session.add(user)
 
-    session.add(user)
+        if user_data.properties:
+            for client_property in user_data.properties:
+                property_obj = Property(
+                    created_at=client_property.created_at,
+                    property_type=client_property.property_type,
+                    user=user,
+                )
+                session.add(property_obj)
 
-    if user_data.properties:
-        for client_property in user_data.properties:
-            property_obj = Property(
-                created_at=client_property.created_at,
-                property_type=client_property.property_type,
-                user=user,
+        await session.commit()
+        await session.refresh(user)
+
+        # Verificacion Email
+        print("Enviando email de verificacion")
+        await send_account_verification_email(user, background_tasks=background_tasks)
+
+        return user
+    else:
+        email_check = await session.execute(
+            select(User).where(User.email == user.email)
+        )
+        email_check = email_check.scalar_one_or_none()
+
+        if email_check:
+            return "User already exists.", user
+        else:
+            name_check = await session.execute(
+                select(User).where(User.name == user.name)
             )
-            session.add(property_obj)
+            name_check = name_check.scalar_one_or_none()
 
-    await session.commit()
-    await session.refresh(user)
+            if name_check:
+                # Crear usuario con nombre y un numero random
+                user.name = user.name + str(random.randint(1, 100))
 
-    # Verificacion Email
-    print("Enviando email de verificacion")
-    await send_account_verification_email(user, background_tasks=background_tasks)
-
-    return user
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+        return user
 
 
 async def activate_account(

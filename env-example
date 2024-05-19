@@ -1,8 +1,40 @@
-DATABASE_URL=
+# Database
+POSTGRES_URL=postgresql+asyncpg://
 
-SECRET_KEY = 
+
+SECRET_KEY =
 ALGORITHM =
 ACCESS_TOKEN_EXPIRE_MINUTES =
 REFRESH_TOKEN_EXPIRE_MINUTES =
 
-BROWSER =
+BROWSER = firefox
+
+# Scrap Server
+SCRAP_URL = 
+
+# Google Authentication
+CLIENT_ID= 
+CLIENT_SECRET= 
+REDIRECT_URI= 
+AUTH_URI= https://accounts.google.com/o/oauth2/auth
+TOKEN_URI= https://oauth2.googleapis.com/token
+
+# Email settings
+MAIL_USERNAME= 
+MAIL_PASSWORD= 
+MAIL_PORT= 
+MAIL_SERVER= 
+MAIL_STARTTLS= 
+MAIL_SSL_TLS= 
+MAIL_DEBUG=
+MAIL_FROM=
+MAIL_FROM_NAME=
+TEMPLATE_FOLDER=
+USE_CREDENTIALS=
+SUPPRESS_SEND= 
+
+# APP
+APP_NAME=
+
+# FRONTEND
+FRONTEND_URL=
