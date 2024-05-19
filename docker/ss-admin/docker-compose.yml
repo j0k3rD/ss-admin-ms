@@ -1,0 +1,19 @@
+services:
+  ss-admin:
+    container_name: ss-admin
+    build:
+      context: ../../
+    volumes:
+      - ./src:/app/src
+    ports:
+      - ${SS_ADMIN_PORT}:${SS_ADMIN_PORT}
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - ss-network
+
+networks:
+  ss-network:
+    driver: bridge
+    external: true
