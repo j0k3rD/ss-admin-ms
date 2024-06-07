@@ -31,11 +31,16 @@ class ServiceType(str, Enum):
     GAS = "gas"
     OTRO = "otro"
 
+class ScrapingType(str, Enum):
+    PDF = "pdf"
+    WEB = "web"
+
+
 
 class ServiceBase(SQLModel):
     company_name: str
     service_type: ServiceType | None
-    scrapping_type: str
+    scrapping_type: ScrapingType | None
 
 
 class Service(ServiceBase, table=True):
