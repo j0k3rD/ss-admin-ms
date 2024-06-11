@@ -84,16 +84,18 @@ async def update_property_route(
     return client_property
 
 
-@client_property.delete("/property/{property_id}", tags=["properties"])
+@client_property.delete(
+    "/property/{property_id}",
+    tags=["properties"],
+)
 async def delete_property_route(
-    # _: Annotated[bool, Depends(RoleChecker(allowed_roles=["user"]))],
     property_id: int,
     session: Session = Depends(get_session),
-) -> Property:
+) -> None:
     client_property = await delete_property(session, property_id)
     if client_property is None:
         raise HTTPException(status_code=404, detail="Property not found")
-    return client_property
+    return None
 
 
 @client_property.post("/property", tags=["properties"])

@@ -95,7 +95,10 @@ class Property(PropertyBase, table=True):
 
 
 class PropertyWithUser(PropertyBase):
-    user: "User" = None
+    property_type: PropertyType
+    user_id: int
+    user: "User"
+    client_services: Optional[List[str]] = None
 
 
 # -------------------------------------------------------------------------------------------------#
@@ -164,6 +167,7 @@ class ScrappedData(ScrappedDataBase, table=True):
 
 class ProviderClientBase(SQLModel):
     client_code: str
+    debt: bool = False
 
     service_id: int = Field(foreign_key="service.id")
     user_id: int = Field(foreign_key="user.id")

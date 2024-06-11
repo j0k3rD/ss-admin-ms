@@ -12,27 +12,17 @@ async def get_properties(session: Session) -> list[Property]:
     return result.scalars().all()
 
 
-async def get_property(session: Session, property_id: int) -> PropertyWithUser:
-    result = await session.execute(
-        select(Property)
-        .options(joinedload(Property.user))
-        .where(Property.id == property_id)
-    )
-    property = result.scalars().first()
-
-    if property:
-        property_dict = property.__dict__.copy()
-        property_dict.pop("user", None)
-        property_with_user = PropertyWithUser(
-            **property_dict, user=property.user.__dict__
-        )
-        return property_with_user
-
-    raise HTTPException(status_code=404, detail="Property not found")
+async def get_property(session: Session, property_id: int) -> Property:
+    result = await session.get(Property, property_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Property not found")
+    return result
 
 
 async def get_all_properties_by_user(session: Session, user_id: int) -> list[Property]:
     result = await session.execute(select(Property).where(Property.user_id == user_id))
+    if result is None:
+        raise HTTPException(status_code=404, detail="Properties not found")
     return result.scalars().all()
 
 
@@ -77,13 +67,14 @@ async def update_property(
 
 
 async def delete_property(session: Session, property_id: int) -> Property:
-    client_property = session.get(Property, property_id)
+    client_property = await session.get(Property, property_id)
+
     if client_property is None:
         raise HTTPException(status_code=404, detail="Property not found")
 
-    session.delete(client_property)
+    await session.delete(client_property)
     await session.commit()
-    return {"message": "Property deleted successfully"}
+    return client_property
 
 
 async def create_property(
