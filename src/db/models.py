@@ -31,22 +31,22 @@ class ServiceType(str, Enum):
     GAS = "gas"
     OTRO = "otro"
 
+
 class ScrapingType(str, Enum):
     PDF = "pdf"
     WEB = "web"
 
 
-
 class ServiceBase(SQLModel):
     company_name: str
     service_type: ServiceType | None
-    scrapping_type: ScrapingType | None
+    scraping_type: ScrapingType | None
 
 
 class Service(ServiceBase, table=True):
     id: int = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=datetime.now)
-    scrapping_config: Dict = Field(default_factory=dict, sa_column=Column(pg.JSONB))
+    scraping_config: Dict = Field(default_factory=dict, sa_column=Column(pg.JSONB))
     crontab: Dict = Field(default_factory=dict, sa_column=Column(pg.JSONB))
     schedule: Dict = Field(default_factory=dict, sa_column=Column(pg.JSONB))
     providers_client: list["ProviderClient"] = Relationship(back_populates="service")
@@ -56,8 +56,8 @@ class Service(ServiceBase, table=True):
             "id": self.id,
             "company_name": self.company_name,
             "service_type": self.service_type,
-            "scrapping_type": self.scrapping_type,
-            "scrapping_config": self.scrapping_config,
+            "scraping_type": self.scraping_type,
+            "scraping_config": self.scraping_config,
             "crontab": self.crontab,
             "schedule": self.schedule,
         }

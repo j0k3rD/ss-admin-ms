@@ -67,8 +67,8 @@ async def create_service(session: Session, service_data: Service) -> Service:
         service = Service(
             company_name=service_data.company_name,
             service_type=service_data.service_type,
-            scrapping_type=service_data.scrapping_type,
-            scrapping_config=service_data.scrapping_config,
+            scraping_type=service_data.scraping_type,
+            scraping_config=service_data.scraping_config,
             crontab=str(cron_value.__dict__),
             schedule=service_data.schedule,
         )
