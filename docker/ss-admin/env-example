@@ -16,12 +16,12 @@ REFRESH_TOKEN_EXPIRE_MINUTES=3600
 BROWSER=firefox
 
 # Scrap Server
-SCRAP_URL=http://localhost:5000/api/v1
+SCRAP_URL=http://0.0.0.0:5000/api/v1
 
 # Google Authentication
 CLIENT_ID=example_client_id
 CLIENT_SECRET=example_client_secret
-REDIRECT_URI=http://localhost:5001/api/v1/auth/callback
+REDIRECT_URI=http://0.0.0.0:5001/api/v1/auth/callback
 AUTH_URI=https://accounts.google.com/o/oauth2/auth
 TOKEN_URI=https://oauth2.googleapis.com/token
 
@@ -40,4 +40,4 @@ SUPPRESS_SEND=False
 
 APP_NAME=ExampleApp
 # FRONTEND
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=http://0.0.0.0:3000
