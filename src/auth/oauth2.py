@@ -7,7 +7,7 @@ from src.config.settings import get_settings
 from src.db.database import get_session
 from sqlmodel import Session
 from fastapi.responses import JSONResponse
-from src.security.create_token import create_token
+from src.security.create_token import create_access_token
 from datetime import timedelta
 from src.services.user_service import create_user
 from src.db.models import UserCreate
@@ -72,7 +72,7 @@ async def auth_callback(code: str, session: Session = Depends(get_session)):
             minutes=get_settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
 
-        access_token = create_token(
+        access_token = create_access_token(
             data={"id": user[1].id, "sub": user[1].name, "role": user[1].role},
             expires_delta=access_token_expires,
         )

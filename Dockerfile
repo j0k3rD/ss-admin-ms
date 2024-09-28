@@ -1,5 +1,3 @@
-# synctax = docker/dockerfile:1
-
 ARG PYTHON_VERSION=3.12
 FROM python:${PYTHON_VERSION}-slim AS base
 
@@ -25,6 +23,11 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 COPY . .
 
-EXPOSE 5000
+# Copiar el script boot.sh
+COPY boot.sh /usr/local/bin/boot.sh
+RUN chmod +x /usr/local/bin/boot.sh
 
-CMD uvicorn src.main:app --host 0.0.0.0 --port 5000 --reload
+EXPOSE 5001
+
+# Cambiar el comando por defecto
+CMD ["/usr/local/bin/boot.sh"]

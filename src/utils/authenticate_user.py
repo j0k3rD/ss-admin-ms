@@ -8,11 +8,9 @@ async def authenticate_user(
     username: str,
     password: str,
 ) -> User:
-    print(username, password)
     session = await get_session().__anext__()
     result = await session.exec(select(User).where(User.name == username))
     user = result.first()
-    print(user)
     if not user:
         return False
     if not f.verify(password, user.password):

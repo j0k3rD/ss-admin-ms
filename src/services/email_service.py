@@ -11,7 +11,9 @@ async def send_account_verification_email(
 ):
     string_context = user.get_context_string(context=USER_VERIFY_ACCOUNT)
     token = f.hash(string_context)
-    activate_url = f"http://192.168.18.4:5000/api/v1/activate-account?token={token}&email={user.email}"
+    activate_url = (
+        f"http://0.0.0.0:5001/api/v1/activate-account?token={token}&email={user.email}"
+    )
     data = {
         "app_name": get_settings.APP_NAME,
         "name": user.name,
@@ -31,7 +33,7 @@ async def send_account_activation_email(user: User, background_tasks: Background
     data = {
         "app_name": get_settings.APP_NAME,
         "name": user.name,
-        "login_url": f"{get_settings.FRONTEND_URL}/auth/login",
+        "login_url": f"{get_settings.FRONTEND_URL}/login",
     }
     subject = f"Activacion de Cuenta - {get_settings.APP_NAME}"
     await send_email(

@@ -40,8 +40,10 @@ app = FastAPI(
 app.add_middleware(SessionMiddleware, secret_key=get_settings.SECRET_KEY)
 
 origins = [
-    "http://localhost",
-    "http://192.168.18.4",
+    "http://ss-webscraper:5000",
+    "http://ss-frontend:3000",
+    "http://0.0.0.0:3000",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
@@ -54,8 +56,8 @@ app.add_middleware(
 
 app.include_router(oauth2)
 app.include_router(token.token)
-app.include_router(user.user)
 app.include_router(service.service)
+app.include_router(user.user)
 app.include_router(client_property.client_property)
 app.include_router(provider_client.provider_client)
 app.include_router(scrapped_data.scrapped_data)

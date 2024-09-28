@@ -1,5 +1,6 @@
 from fastapi import HTTPException
-import httpx, os
+import httpx
+import os
 from src.services.provider_client_service import get_provider_client
 from src.services.service_service import get_service
 from sqlmodel import Session
@@ -23,11 +24,11 @@ async def generate_scrap_request(session: Session, provider_client_id: int):
 
     print("data:", data)
 
-    url = os.getenv("SCRAP_URL") + "/scrap"
+    url = os.getenv("SCRAP_URL")
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, json=data)
+            response = await client.post(url + "/scrap", json=data)
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail=response.text)
         return response.json()

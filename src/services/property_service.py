@@ -19,11 +19,17 @@ async def get_property(session: Session, property_id: int) -> Property:
     return result
 
 
-async def get_all_properties_by_user(session: Session, user_id: int) -> list[Property]:
+async def get_all_properties_by_user(
+    session: AsyncSession, user_id: int
+) -> list[Property]:
     result = await session.execute(select(Property).where(Property.user_id == user_id))
-    if result is None:
+
+    properties = result.scalars().all()
+
+    if not properties:
         raise HTTPException(status_code=404, detail="Properties not found")
-    return result.scalars().all()
+
+    return properties
 
 
 async def get_properties_with_services(session: Session) -> list[Property]:
@@ -36,7 +42,8 @@ async def get_properties_with_services(session: Session) -> list[Property]:
     for property in properties:
         property_dict = property.__dict__.copy()
         property_dict.pop("services", None)
-        property_with_services = Property(**property_dict, services=property.services)
+        property_with_services = Property(
+            **property_dict, services=property.services)
         properties_with_services.append(property_with_services)
 
     return properties_with_services
@@ -80,11 +87,11 @@ async def delete_property(session: Session, property_id: int) -> Property:
 async def create_property(
     session: AsyncSession, property_data: Property, current_user: User
 ) -> Property:
-
     # Chequear si el usuario ya tiene 2 propiedades
     nproperties = await get_nproperties_by_user(session, current_user.id)
     if nproperties == True:
-        raise HTTPException(status_code=400, detail="User already has 2 properties")
+        raise HTTPException(
+            status_code=400, detail="User already has 2 properties")
 
     try:
         # Obtener los servicios del usuario

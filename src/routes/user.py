@@ -104,6 +104,8 @@ async def register(
     session: Session = Depends(get_session),
 ) -> dict:
     user = await create_user(session, user_data, background_tasks)
+    if user == "User already exists.":
+        raise HTTPException(status_code=409, detail="User already exists")
     return {"user": user, "message": "User created successfully"}
 
 

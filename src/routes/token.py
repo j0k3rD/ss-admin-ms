@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, APIRouter, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from src.utils.authenticate_user import authenticate_user
-from src.security.create_token import create_token
+from src.security.create_token import create_access_token
 from src.utils.validate_refresh_token import validate_refresh_token
 from src.utils.verify_token import verify_token
 from src.db.models import Token, User
@@ -23,7 +23,7 @@ token = APIRouter()
 
 @token.post("/token", tags=["token"])
 async def login_for_access_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> Token:
     user = await authenticate_user(
         form_data.username,
@@ -33,18 +33,12 @@ async def login_for_access_token(
         raise HTTPException(status_code=400, detail="Incorrect Username or Password")
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    refresh_token_expires = timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
 
-    access_token = create_token(
+    access_token = create_access_token(
         data={"id": user.id, "sub": user.name, "role": user.role},
         expires_delta=access_token_expires,
     )
-    refresh_token = create_token(
-        data={"sub": user.name, "role": user.role},
-        expires_delta=refresh_token_expires,
-    )
-    refresh_tokens.append(refresh_token)
-    return Token(access_token=access_token, refresh_token=refresh_token)
+    return Token(access_token=access_token, token_type="bearer")
 
 
 # @token.post("/refresh", tags=["token"])

@@ -26,7 +26,7 @@ SessionTesting = sessionmaker(autoflush=False, bind=async_engine, autocommit=Fal
 
 @pytest.fixture(scope="function")
 async def db():
-    pool = await create_pool(dsn="postgresql://j0k3r:mario2014@localhost/ss_admin")
+    pool = await create_pool(dsn=get_settings.POSTGRES_URL)
     conn = await pool.acquire()
     yield conn
     await pool.release(conn)
