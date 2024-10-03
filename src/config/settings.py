@@ -15,7 +15,6 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_MINUTES: int
     # Configuración de ScrapService
-    BROWSER: str
     SCRAP_URL: str
     # Configuración de envío de correos
     MAIL_USERNAME: str

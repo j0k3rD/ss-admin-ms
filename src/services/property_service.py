@@ -42,8 +42,7 @@ async def get_properties_with_services(session: Session) -> list[Property]:
     for property in properties:
         property_dict = property.__dict__.copy()
         property_dict.pop("services", None)
-        property_with_services = Property(
-            **property_dict, services=property.services)
+        property_with_services = Property(**property_dict, services=property.services)
         properties_with_services.append(property_with_services)
 
     return properties_with_services
@@ -87,29 +86,29 @@ async def delete_property(session: Session, property_id: int) -> Property:
 async def create_property(
     session: AsyncSession, property_data: Property, current_user: User
 ) -> Property:
-    # Chequear si el usuario ya tiene 2 propiedades
+    # Check if the user already has 2 properties
     nproperties = await get_nproperties_by_user(session, current_user.id)
-    if nproperties == True:
-        raise HTTPException(
-            status_code=400, detail="User already has 2 properties")
+    if nproperties >= 2:
+        raise HTTPException(status_code=400, detail="User already has 2 properties")
 
-    try:
-        # Obtener los servicios del usuario
-        services = await get_client_services(session, current_user.id)
-        if services == "Client services not found":
-            services = []
-        elif property_data.client_services is not None:
-            # Verificar si el usuario ya tiene un servicio de ese tipo y solo agrega los nuevos
-            for service in property_data.client_services:
-                if service not in services:
-                    services.append(service)
-    except Exception as e:
-        print("Error: ", e)
-        services = []
-    property_data.client_services = services
+    # Check that the property does not have duplicate services
+    if hasattr(property_data, "client_services"):
+        service_ids = [
+            service["service_id"] for service in property_data.client_services
+        ]
+        if len(service_ids) != len(set(service_ids)):
+            raise HTTPException(
+                status_code=400, detail="Property has duplicate services"
+            )
+    else:
+        raise HTTPException(
+            status_code=400, detail="Property data missing 'client_services' attribute"
+        )
+
     property_data_dict = property_data.dict()
-    property_data_dict.pop("user_id", None)
-    property = Property(**property_data_dict, user_id=current_user.id)
+    property_data_dict["user_id"] = current_user.id
+
+    property = Property(**property_data_dict)
     session.add(property)
     await session.commit()
     await session.refresh(property)

@@ -20,6 +20,7 @@ class Token(SQLModel):
     access_token: str | None
     token_type: str | None
 
+
 # -------------------------------------------------------------------------------------------------#
 
 
@@ -84,8 +85,9 @@ class PropertyBase(SQLModel):
 
 class Property(PropertyBase, table=True):
     id: int = Field(default=None, primary_key=True)
+    name: str
     created_at: datetime = Field(default_factory=datetime.now)
-    client_services: List[str] = Field(sa_column=Column(JSON))
+    client_services: List[Dict[str, str]] = Field(sa_column=Column(JSON))
 
     user: "User" = Relationship(back_populates="properties")
 

@@ -7,7 +7,7 @@ services:
       - ./src:/app/src
     ports:
       - ${SS_ADMIN_PORT}:${SS_ADMIN_PORT}
-    restart: always
+    # restart: always
     env_file:
       - .env
     networks:
@@ -16,7 +16,7 @@ services:
   db:
     container_name: ss-postgres
     image: postgres:16.3
-    restart: always
+    # restart: always
     shm_size: 128mb
     environment:
       POSTGRES_USER: ${POSTGRES_USER}

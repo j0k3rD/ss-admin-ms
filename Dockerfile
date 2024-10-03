@@ -16,11 +16,16 @@ RUN adduser \
     --uid ${UID} \
     appuser
 
+# Instalando redis-cli (redis-tools), curl y ping (iputils-ping)
+RUN apt-get update && apt-get install -y redis-tools curl iputils-ping \
+    && rm -rf /var/lib/apt/lists/*
+
 # Instalando dependencias
 RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=/requirements/dev.txt,target=/src/requirements.txt \
     python -m pip install -r requirements.txt
 
+# Copiando el código de la aplicación
 COPY . .
 
 # Copiar el script boot.sh

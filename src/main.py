@@ -41,6 +41,8 @@ app.add_middleware(SessionMiddleware, secret_key=get_settings.SECRET_KEY)
 
 origins = [
     "http://ss-webscraper:5000",
+    "http://0.0.0.0:5000",
+    "http://localhost:5000",
     "http://ss-frontend:3000",
     "http://0.0.0.0:3000",
     "http://localhost:3000",

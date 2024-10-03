@@ -14,10 +14,8 @@ async def generate_scrap_request(session: Session, provider_client_id: int):
         session, provider_client_id=provider_client_id
     )
     service = await get_service(session, service_id=provider_client.service_id)
-    browser = os.getenv("BROWSER")
 
     data = {
-        "browser": browser,
         "provider_client": provider_client.to_dict(),
         "service": service.to_dict(),
     }
@@ -26,11 +24,15 @@ async def generate_scrap_request(session: Session, provider_client_id: int):
 
     url = os.getenv("SCRAP_URL")
 
+    print("url:", url + "/scrap")
+
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(url + "/scrap", json=data)
-        if response.status_code != 200:
-            raise HTTPException(status_code=response.status_code, detail=response.text)
-        return response.json()
+            return response.json()
+    except httpx.RequestError as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
